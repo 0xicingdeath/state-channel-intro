@@ -1,3 +1,4 @@
-chains.json 
+chains.json  
+build*
 node*
 .embark*

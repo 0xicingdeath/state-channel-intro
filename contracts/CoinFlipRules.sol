@@ -43,4 +43,13 @@ contract CoinFlip {
         allGames[uid].state = GameState.FINISHED;
     }
 
+    function recoverAddressFromHashAndParameters(uint8 v, bytes32 r, bytes32 s)
+        public pure
+        returns(address) {
+            bytes memory prefix = "\x19Ethereum Signed Message:\n32";
+            bytes32 msgHash = keccak256((abi.encodePacked()));
+            bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, msgHash));
+            return ecrecover(prefixedHash, v, r, s);
+    }
+
 }

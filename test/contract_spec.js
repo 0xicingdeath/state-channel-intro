@@ -1,6 +1,6 @@
 // /*global contract, config, it, assert*/
-/*
-const SimpleStorage = require('Embark/contracts/SimpleStorage');
+const ethers = require('ethers');
+const CoinFlip = require('Embark/contracts/CoinFlip');
 
 let accounts;
 
@@ -13,9 +13,7 @@ config({
   //  ]
   //},
   contracts: {
-    "SimpleStorage": {
-      args: [100]
-    }
+    "CoinFlip": {}
   }
 }, (_err, web3_accounts) => {
   accounts = web3_accounts
@@ -24,20 +22,45 @@ config({
 contract("SimpleStorage", function () {
   this.timeout(0);
 
-  it("should set constructor value", async function () {
-    let result = await SimpleStorage.methods.storedData().call();
-    assert.strictEqual(parseInt(result, 10), 100);
+  it("should deploy Coin flip Rules", async function () {
+    let result = CoinFlip.options.address;
+    assert.ok(result.length > 0);
   });
 
-  it("set storage value", async function () {
-    await SimpleStorage.methods.set(150).send();
-    let result = await SimpleStorage.methods.get().call();
-    assert.strictEqual(parseInt(result, 10), 150);
+  it("should get signature values", async function () {
+    const ethers = require('ethers');
+    const CoinFlip = require('../build/contracts/CoinFlip.json');
+    var pk = "0x1f9fa05416fd2176404e5e922520b481af1512e62a73996d858d1d255f8f74d3";
+    let signingKey = new ethers.utils.SigningKey(pk);
+    let provider = ethers.getDefaultProvider();
+
+    let wallet = new ethers.Wallet(pk, provider);
+    console.log("Wallet address: " + wallet.address);
+
+    let contractAddress = CoinFlip['deployedAddress'];
+    console.log("Contract Address: " + contractAddress);
+    let contract = new ethers.Contract(contractAddress, CoinFlip['abiDefinition'], provider);
+
+    let message = "Hello World";
+    let messageBytes = ethers.utils.toUtf8Bytes(message);
+    let messageDigest = ethers.utils.keccak256(messageBytes);
+    console.log("Digest: " + messageDigest);
+
+    let signature = signingKey.signDigest(messageDigest);
+    console.log(signature);
+    let recovered = ethers.utils.recoverAddress(messageDigest, signature);
+
+    console.log("Recovered: " + recovered);
+
+    let publicKey = signingKey.publicKey;
+
+    console.log('Public Key: ' + publicKey);
+
+    let address = ethers.utils.computeAddress(publicKey);
+
+    console.log('Address: ' + address);
   });
 
-  it("should have account with balance", async function() {
-    let balance = await web3.eth.getBalance(accounts[0]);
-    assert.ok(parseInt(balance, 10) > 0);
-  });
-}
-*/
+
+
+});
